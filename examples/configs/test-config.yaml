@@ -1,0 +1,18 @@
+input_data:
+    content_column: 'content'
+    label_column: 'label'
+    max_length: 512
+    input_data_path: './datasets/sample_data.jsonl'
+    stop_list_path: './datasets/sample_stoplist.txt'
+    
+input_model:
+    model_dir: '../examples/test_model/'  
+    
+model:
+    do_train: False
+
+output_data:
+    output_dir: '../output'
+    
+fairhousing:
+    threshold: 0.5

@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "fair-housing-guardrail"
+version = "0.1.0"
+description = ""
+authors = ["Anusha Bagalkotkar <anusha.bagalkotkar@gmail.com>", "Aveek Karmakar <aveekkar@buffalo.edu>", "Trevor Nogues <noguestj@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+accelerate = "0.26.1"
+evaluate = "0.4.1"
+matplotlib = "3.8.2"
+plotly = "5.18.0"
+nltk = "3.8.1"
+numpy = "1.26.4"
+pandas = "2.2.0"
+scikit-learn = "1.4.0"
+torch = "2.2.0"
+tqdm = "4.66.1"
+transformers = "4.37.2"
+pre-commit = "^3.6.2"
+pytest = "^8.0.2"
+
+
+[build-system]
+requires = ["poetry_core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 110

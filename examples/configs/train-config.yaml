@@ -1,0 +1,26 @@
+input_data:
+    content_column: 'content'
+    label_column: 'label'
+    max_length: 512
+    input_data_path: './datasets/sample_data.jsonl'
+    stop_list_path: './datasets/sample_stoplist.txt'
+    
+output_data:
+    output_dir: '../output'
+    model_output_dir: '../output/model'
+    tokenizer_output_dir: '../output/tokenizer'
+
+model:
+    do_train: True
+    learning_rate: 1e-5
+    train_batch_size: 32
+    eval_batch_size: 32
+    num_train_epochs: 1
+    weight_decay: 0.01
+    eval_steps: 10
+    logging_steps: 20
+    save_steps: 20
+    save_total_limit: 3
+    
+fairhousing:
+    threshold: 0.5
