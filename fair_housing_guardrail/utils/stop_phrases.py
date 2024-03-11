@@ -26,7 +26,8 @@ class ProtectedAttributesStopWordsCheck(object):
     def check_phrase_is_compliant(self, query):
         """
         Checks entire query against words/phrases in stoplist file.
-        This is used as a check prior to classifier model to block clearly explicit words or phrases.
+        This is used as a check prior to classifier model to block
+        clearly explicit words or phrases.
         """
         unigrams = self.tokenizer.tokenize(query.lower())
         if " ".join(unigrams) in self.stemmed_lemmatized_stop_list:
@@ -47,5 +48,7 @@ class ProtectedAttributesStopWordsCheck(object):
     @classmethod
     def get_instance(cls, denied_phrases_file):
         if not hasattr(cls, "instance"):
-            cls.instance = ProtectedAttributesStopWordsCheck(denied_phrases_file=denied_phrases_file)
+            cls.instance = ProtectedAttributesStopWordsCheck(
+                denied_phrases_file=denied_phrases_file
+            )
         return cls.instance

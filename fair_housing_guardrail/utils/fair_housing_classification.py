@@ -1,22 +1,14 @@
-import json
 import logging
 from typing import Dict, List, Tuple, Union
 
-import numpy as np
-import pandas as pd
 import torch
-from torch import nn
-from tqdm import tqdm
+from data.constants import ID_TO_LABEL
 from transformers import (
-    AutoModelForSequenceClassification,
-    AutoTokenizer,
     DataCollatorWithPadding,
     Trainer,
     TrainingArguments,
 )
-from data.constants import ID_TO_LABEL
 from utils.helper import compute_metrics, load_model, load_phrase_checker
-
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -66,8 +58,12 @@ class FairHousingGuardrailClassification:
         )
         logger.info("Trainer built. Running training...")
         self.trainer.train()
-        train_loss = [(i["loss"], i["step"]) for i in self.trainer.state.log_history if "loss" in i]
-        eval_loss = [(i["eval_loss"], i["step"]) for i in self.trainer.state.log_history if "eval_loss" in i]
+        train_loss = [
+            (i["loss"], i["step"]) for i in self.trainer.state.log_history if "loss" in i
+        ]
+        eval_loss = [
+            (i["eval_loss"], i["step"]) for i in self.trainer.state.log_history if "eval_loss" in i
+        ]
         return train_loss, eval_loss
 
     def predict(self) -> List[Dict[str, Union[str, float]]]:
@@ -76,7 +72,8 @@ class FairHousingGuardrailClassification:
         Each object represents the prediction results per input with the following data:
             prediction: compliant or non-compliant
             score: classifier score (0 if Stoplist fails)
-            non-compliant-text: first sentence in input to fail compliance check (empty if compliant)
+            non-compliant-text: first sentence in input to fail compliance check
+            (empty if compliant)
         """
         self.model = self.model.eval()
         input_strs = self.test_dataset[self.config["input_data"]["content_column"]].tolist()
@@ -113,7 +110,9 @@ class FairHousingGuardrailClassification:
         preds = torch.nn.functional.sigmoid(outs.logits.squeeze(1))
         # Set value of 0 or 1 to preds, based on threshold
         preds_modified = torch.where(
-            preds > threshold, torch.tensor(1, device=self.device), torch.tensor(0, device=self.device)
+            preds > threshold,
+            torch.tensor(1, device=self.device),
+            torch.tensor(0, device=self.device),
         )
 
         preds = preds.cpu().numpy()

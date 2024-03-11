@@ -7,18 +7,18 @@ import pandas as pd
 from fair_housing_guardrail.utils.fair_housing_classification import (
     FairHousingGuardrailClassification,
 )
-from fair_housing_guardrail.utils.helper import (
-    load_config,
-    load_dataset,
-    load_tokenizer,
-)
+from fair_housing_guardrail.utils.helper import load_config, load_dataset, load_tokenizer
 
 current_path = os.getcwd()
 CONFIG_FILE_PATH = os.path.join(current_path, "examples/configs/test-config.yaml")
 config = load_config(CONFIG_FILE_PATH)
 config["input_model"]["model_dir"] = os.path.join(current_path, "examples/test_model/")
-config["input_data"]["stop_list_path"] = os.path.join(current_path, "examples/datasets/sample_stoplist.txt")
-config["input_data"]["input_data_path"] = os.path.join(current_path, "examples/datasets/sample_data.jsonl")
+config["input_data"]["stop_list_path"] = os.path.join(
+    current_path, "examples/datasets/sample_stoplist.txt"
+)
+config["input_data"]["input_data_path"] = os.path.join(
+    current_path, "examples/datasets/sample_data.jsonl"
+)
 tokenizer = load_tokenizer()
 
 

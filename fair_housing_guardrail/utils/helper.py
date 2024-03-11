@@ -1,17 +1,15 @@
+import logging
 import os
 
 import evaluate
-import logging
 import pandas as pd
 import torch
 import yaml
-from sklearn.model_selection import train_test_split
-from transformers import AutoModelForSequenceClassification, AutoTokenizer
-
 from data.constants import LABEL_TO_ID
 from data.json_dataset import JsonDataset
+from sklearn.model_selection import train_test_split
+from transformers import AutoModelForSequenceClassification, AutoTokenizer
 from utils.stop_phrases import ProtectedAttributesStopWordsCheck
-
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -56,14 +54,16 @@ def load_tokenizer():
 
 
 def load_model(config):
-    if "model" in config and config["model"]["do_train"] == True:
+    if "model" in config and config["model"]["do_train"] is True:
         logger.info("Train Mode: Loading bert-base-uncased")
-        return AutoModelForSequenceClassification.from_pretrained("bert-base-uncased", num_labels=1)
+        return AutoModelForSequenceClassification.from_pretrained(
+            "bert-base-uncased", num_labels=1
+        )
     if "input_model" not in config:
         raise Exception("Error: must define either 'model' or 'input_model' in config.")
     if config["input_model"]["model_dir"] is None:
         raise Exception("Predict Mode: Unable to load model as model_dir is None")
-        
+
     return AutoModelForSequenceClassification.from_pretrained(
         config["input_model"]["model_dir"], num_labels=1
     )
@@ -79,7 +79,7 @@ def load_dataset(config, tokenizer):
     pd_data = pd.read_json(config["input_data"]["input_data_path"], orient="records", lines=True)
     logger.info("Found the following columns in data: " + pd_data.columns)
 
-    if "model" in config and config["model"]["do_train"] == True:
+    if "model" in config and config["model"]["do_train"] is True:
         train_df, test_df = train_test_split(pd_data, test_size=0.5)
         logger.info("Splitting dataset into train and test sets")
         logger.info(f"Train count: {train_df.count()}")
