@@ -5,11 +5,12 @@ import evaluate
 import pandas as pd
 import torch
 import yaml
-from data.constants import LABEL_TO_ID
-from data.json_dataset import JsonDataset
 from sklearn.model_selection import train_test_split
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
-from utils.stop_phrases import ProtectedAttributesStopWordsCheck
+
+from fair_housing_guardrail.data.constants import LABEL_TO_ID
+from fair_housing_guardrail.data.json_dataset import JsonDataset
+from fair_housing_guardrail.utils.stop_phrases import ProtectedAttributesStopWordsCheck
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)

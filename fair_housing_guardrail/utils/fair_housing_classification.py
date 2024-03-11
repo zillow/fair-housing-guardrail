@@ -2,9 +2,10 @@ import logging
 from typing import Dict, List, Tuple, Union
 
 import torch
-from data.constants import ID_TO_LABEL
 from transformers import DataCollatorWithPadding, Trainer, TrainingArguments
-from utils.helper import compute_metrics, load_model, load_phrase_checker
+
+from fair_housing_guardrail.data.constants import ID_TO_LABEL
+from fair_housing_guardrail.utils.helper import compute_metrics, load_model, load_phrase_checker
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
