@@ -7,7 +7,7 @@ import pandas as pd
 from fair_housing_guardrail.utils.fair_housing_classification import (
     FairHousingGuardrailClassification,
 )
-from fair_housing_guardrail.utils.helper import load_config, load_dataset, load_tokenizer
+from fair_housing_guardrail.utils.helper import load_config, load_tokenizer
 
 current_path = os.getcwd()
 CONFIG_FILE_PATH = os.path.join(current_path, "examples/configs/test-config.yaml")

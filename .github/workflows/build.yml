@@ -46,7 +46,7 @@ jobs:
         uses: py-actions/flake8@v1
         with:
           max-line-length: "99"
-          exclude: "examples/*"
+          exclude: "examples/*,fair_housing_guardrail/__init__.py"
 
       - name: Test with pytest
         run: |
