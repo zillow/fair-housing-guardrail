@@ -13,13 +13,13 @@ output_data:
 model:
     do_train: True
     learning_rate: 1e-5
-    train_batch_size: 32
-    eval_batch_size: 32
-    num_train_epochs: 1
+    train_batch_size: 4
+    eval_batch_size: 4
+    num_train_epochs: 5
     weight_decay: 0.01
-    eval_steps: 10
-    logging_steps: 20
-    save_steps: 20
+    eval_steps: 1
+    logging_steps: 1
+    save_steps: 1
     save_total_limit: 3
     
 fairhousing:

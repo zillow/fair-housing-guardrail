@@ -20,6 +20,7 @@ tqdm = "4.66.1"
 transformers = "4.37.2"
 pre-commit = "^3.4.0"
 pytest = "^8.0.2"
+urllib3 = "1.26.18"
 
 
 [build-system]
