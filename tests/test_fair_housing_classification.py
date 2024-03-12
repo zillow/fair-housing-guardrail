@@ -1,6 +1,5 @@
 import os
 import shutil
-import unittest.mock as mock
 from io import StringIO
 
 import pandas as pd
