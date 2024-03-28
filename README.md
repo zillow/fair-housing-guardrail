@@ -30,7 +30,7 @@ The project includes an `examples/` folder that contains two Jupyter notebooks:
 **test_model**: This notebook uses the sample `test-config.yaml` file to create a test dataset. Then, it runs predictions and returns the results.
 **train_model**: This notebook uses the sample `train-config.yaml` file to create train and test datasets. Then, it runs training and plots the training and validation losses and saves the pretrained model.
 
-# TODO: add usage description based on whether we release model or not
+## **TODO:** add usage description based on whether we release model or not, add future road map + limitations
 
 ## Contributing
 See the [Contributing](https://github.com/zillow/fair-housing-guardrail/blob/main/CONTRIBUTING.md) file for instructions on how to submit a PR.
@@ -40,3 +40,7 @@ See the [License](https://github.com/zillow/fair-housing-guardrail/blob/main/LIC
 
 ## Disclaimer
 Fair Housing Guardrail is provided for informational purposes only and should not be considered legal advice. Users are responsible for ensuring compliance with all applicable laws and regulations.
+
+## Future Roadmap
+
+## Limitations
