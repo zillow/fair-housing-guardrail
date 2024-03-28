@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fair-housing-guardrail"
-version = "0.1.0"
+version = "1.0.0"
 description = ""
 authors = ["Anusha Bagalkotkar <anusha.bagalkotkar@gmail.com>", "Aveek Karmakar <aveekkar@buffalo.edu>", "Trevor Nogues <noguestj@gmail.com>"]
 readme = "README.md"
