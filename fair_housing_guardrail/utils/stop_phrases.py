@@ -25,14 +25,25 @@ class ProtectedAttributesStopWordsCheck(object):
 
     def check_phrase_is_compliant(self, query):
         """
-        Checks entire query against words/phrases in stoplist file.
+        Checks entire query against phrases in stoplist file.
         This is used as a check prior to classifier model to block
         clearly explicit words or phrases.
         """
         unigrams = self.tokenizer.tokenize(query.lower())
-        if " ".join(unigrams) in self.stemmed_lemmatized_stop_list:
-            return False
-        unigrams = [self.stemmer.stem(self.lemmatizer.lemmatize(token)) for token in unigrams]
+        unigrams = [
+            self.stemmer.stem(
+                self.lemmatizer.lemmatize(token)
+            ) for token in unigrams
+        ]
+
+        # Exact match check for stoplist phrases in sentence
+        unigrams_str = ' ' + ' '.join(unigrams) + ' '
+        for phrase in self.stemmed_lemmatized_stop_list:
+            phrase_with_space = ' ' + phrase + ' '
+            if phrase_with_space in unigrams_str:
+                return False
+
+        # Unigram and bigram checks
         for token in unigrams:
             if token in self.stemmed_lemmatized_stop_list:
                 return False
