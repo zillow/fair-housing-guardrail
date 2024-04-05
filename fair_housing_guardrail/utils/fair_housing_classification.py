@@ -127,7 +127,7 @@ class FairHousingGuardrailClassification:
             if prediction.get(input_mapping[sent], "compliant") == "non-compliant":
                 # Input already determined to be non-compliant, skip
                 continue
-            if self.phrase_checker.check_phrase_is_compliant(sent):
+            if self.phrase_checker.check_phrase_is_stoplist_compliant(sent):
                 # Stoplist passed
                 score = pred.item()
                 sent_prediction = ID_TO_LABEL[pred_modified.item()]

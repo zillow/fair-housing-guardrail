@@ -23,33 +23,29 @@ class ProtectedAttributesStopWordsCheck(object):
             tokens = [self.stemmer.stem(self.lemmatizer.lemmatize(token)) for token in tokens]
             self.stemmed_lemmatized_stop_list.add(" ".join(tokens))
 
-    def check_phrase_is_compliant(self, query):
+    def check_phrase_is_stoplist_compliant(self, query):
         """
         Checks entire query against phrases in stoplist file.
         This is used as a check prior to classifier model to block
         clearly explicit words or phrases.
         """
         unigrams = self.tokenizer.tokenize(query.lower())
-        unigrams = [
-            self.stemmer.stem(
-                self.lemmatizer.lemmatize(token)
-            ) for token in unigrams
-        ]
+        unigrams = [self.stemmer.stem(self.lemmatizer.lemmatize(token)) for token in unigrams]
 
         # Exact match check for stoplist phrases in sentence
-        unigrams_str = ' ' + ' '.join(unigrams) + ' '
+        unigrams_str = " " + " ".join(unigrams) + " "
         for phrase in self.stemmed_lemmatized_stop_list:
-            phrase_with_space = ' ' + phrase + ' '
+            phrase_with_space = " " + phrase + " "
             if phrase_with_space in unigrams_str:
                 return False
 
         # Unigram and bigram checks
-        for token in unigrams:
-            if token in self.stemmed_lemmatized_stop_list:
+        for unigram in unigrams:
+            if unigram in self.stemmed_lemmatized_stop_list:
                 return False
         bigrams = list(ngrams(unigrams, 2))
-        for n_gram in bigrams:
-            if " ".join(n_gram) in self.stemmed_lemmatized_stop_list:
+        for bigram in bigrams:
+            if " ".join(bigram) in self.stemmed_lemmatized_stop_list:
                 return False
         return True
 
