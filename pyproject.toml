@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-accelerate = "0.28.0"
+accelerate = "0.29.2"
 evaluate = "0.4.1"
 matplotlib = "^3.7.0"
 plotly = "5.18.0"
