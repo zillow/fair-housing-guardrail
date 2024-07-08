@@ -20,7 +20,7 @@ tqdm = "4.66.3"
 transformers = "4.39.1"
 pre-commit = "^3.4.0"
 pytest = "^8.1.1"
-urllib3 = "1.26.18"
+urllib3 = "1.26.19"
 jupyter = "^1.0.0"
 
 
