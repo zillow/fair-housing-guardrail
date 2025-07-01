@@ -1,11 +1,7 @@
-# Security Policy
+# Security
 
-## Supported Versions
+Zillow Group takes the security of our software products and services seriously, which includes all source code repositories in our GitHub organizations.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 1.0.0   | :white_check_mark: |
+**Please do not report security vulnerabilities through public GitHub issues.**
 
-## Reporting a Vulnerability
-
-If you notice any security vulnerabilities, please reach out by raising a [new issue](https://github.com/zillow/fair-housing-guardrail/issues/new).
+To report security issues, please follow [Zillow Group's Responsible Disclosure](https://www.zillowgroup.com/security/disclosure/).
