@@ -57,7 +57,9 @@ def load_tokenizer():
 def load_model(config):
     if "model" in config and config["model"]["do_train"] is True:
         logger.info("Train Mode: Loading bert-base-uncased")
-        return AutoModelForSequenceClassification.from_pretrained("bert-base-uncased", num_labels=1)
+        return AutoModelForSequenceClassification.from_pretrained(
+            "bert-base-uncased", num_labels=1
+        )
     if "input_model" not in config:
         raise Exception("Error: must define either 'model' or 'input_model' in config.")
     if config["input_model"]["model_dir"] is None:

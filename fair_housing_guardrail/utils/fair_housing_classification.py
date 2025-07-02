@@ -59,8 +59,12 @@ class FairHousingGuardrailClassification:
         )
         logger.info("Trainer built. Running training...")
         self.trainer.train()
-        train_loss = [(i["loss"], i["step"]) for i in self.trainer.state.log_history if "loss" in i]
-        eval_loss = [(i["eval_loss"], i["step"]) for i in self.trainer.state.log_history if "eval_loss" in i]
+        train_loss = [
+            (i["loss"], i["step"]) for i in self.trainer.state.log_history if "loss" in i
+        ]
+        eval_loss = [
+            (i["eval_loss"], i["step"]) for i in self.trainer.state.log_history if "eval_loss" in i
+        ]
         return train_loss, eval_loss
 
     def predict(self) -> List[Dict[str, Union[str, float]]]:
