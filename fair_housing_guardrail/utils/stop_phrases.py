@@ -1,5 +1,6 @@
 import nltk
-nltk.download('punkt_tab')
+
+nltk.download("punkt_tab")
 
 from nltk import ngrams
 from nltk.stem import SnowballStemmer, WordNetLemmatizer
@@ -57,7 +58,5 @@ class ProtectedAttributesStopWordsCheck(object):
     @classmethod
     def get_instance(cls, denied_phrases_file):
         if not hasattr(cls, "instance"):
-            cls.instance = ProtectedAttributesStopWordsCheck(
-                denied_phrases_file=denied_phrases_file
-            )
+            cls.instance = ProtectedAttributesStopWordsCheck(denied_phrases_file=denied_phrases_file)
         return cls.instance

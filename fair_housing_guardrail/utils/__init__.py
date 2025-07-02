@@ -1,4 +1,7 @@
-from .fair_housing_classification import FairHousingGuardrailClassification, SigmoidTrainer
+from .fair_housing_classification import (
+    FairHousingGuardrailClassification,
+    SigmoidTrainer,
+)
 from .helper import (
     compute_metrics,
     load_config,
