@@ -1,10 +1,9 @@
 import nltk
-
-nltk.download("punkt_tab")
-
 from nltk import ngrams
 from nltk.stem import SnowballStemmer, WordNetLemmatizer
 from nltk.tokenize import RegexpTokenizer
+
+nltk.download("punkt_tab")
 
 
 class ProtectedAttributesStopWordsCheck(object):
