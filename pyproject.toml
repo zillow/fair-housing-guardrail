@@ -22,7 +22,7 @@ pre-commit = "^3.4.0"
 pytest = "^8.1.1"
 requests = "^2.32.0"
 requests-toolbelt = "^1.0.0"
-urllib3 = "^2.0.0,<3.0.0"
+urllib3 = "^2.6.0"
 jupyter = "^1.1.1"
 
 
