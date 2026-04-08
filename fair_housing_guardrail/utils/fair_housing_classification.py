@@ -171,9 +171,11 @@ class FairHousingGuardrailClassification:
         for input_str_idx in range(len(input_strs)):
             input_prediction = {
                 "prediction": predictions[input_str_idx],
-                "score": sum(total_scores[input_str_idx]) / len(total_scores[input_str_idx])
-                if total_scores[input_str_idx]
-                else 1.0,
+                "score": (
+                    sum(total_scores[input_str_idx]) / len(total_scores[input_str_idx])
+                    if total_scores[input_str_idx]
+                    else 1.0
+                ),
                 "non-compliant-text": non_compliant_text[input_str_idx],
             }
             self.predictions.append(input_prediction)
