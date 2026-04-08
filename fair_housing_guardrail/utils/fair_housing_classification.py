@@ -189,7 +189,7 @@ class CrossEntropyTrainer(Trainer):
 
     def compute_loss(self, model, inputs, return_outputs: bool = False, num_items_in_batch=None):
         outs = model(**{k: v for k, v in inputs.items() if k != "labels"})
-        labels = inputs["labels"]
+        labels = inputs["labels"].long()
         loss = self.loss_fn(outs.logits, labels)
         if return_outputs:
             return loss, outs

@@ -3,6 +3,7 @@ from nltk import ngrams
 from nltk.stem import SnowballStemmer, WordNetLemmatizer
 from nltk.tokenize import RegexpTokenizer
 
+nltk.download("punkt_tab")
 
 class ProtectedAttributesStopWordsCheck(object):
     def __init__(self, denied_phrases_file):
