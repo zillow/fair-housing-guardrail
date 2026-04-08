@@ -23,7 +23,6 @@ global IS_BINARY
 
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
-    global IS_BINARY
     if IS_BINARY:
         # Binary: sigmoid + threshold
         if "fairhousing" in CONFIG_DICT and "threshold" in CONFIG_DICT["fairhousing"]:
@@ -68,14 +67,12 @@ def load_tokenizer(config):
         "input_model_and_tokenizer" in config
         and config["input_model_and_tokenizer"]["model_and_tokenizer_dir"] is not None
     ):
-        print(
-            f"Loading tokenizer from path: {config['input_model_and_tokenizer']['model_and_tokenizer_dir']}"
-        )
+        tokenizer_dir = config["input_model_and_tokenizer"]["model_and_tokenizer_dir"]
+        print(f"Loading tokenizer from path: {tokenizer_dir}")
         return AutoTokenizer.from_pretrained(
             config["input_model_and_tokenizer"]["model_and_tokenizer_dir"]
         )
 
-    global IS_BINARY
     if IS_BINARY:
         logger.info("Loading bert-base-uncased tokenizer")
         return AutoTokenizer.from_pretrained("bert-base-uncased")

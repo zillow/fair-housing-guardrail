@@ -90,7 +90,8 @@ class FairHousingGuardrailClassification:
         Each object represents the prediction results per input with the following data:
             prediction: predicted class label
             score: classifier confidence (probability)
-            non-compliant-text: first sentence in input to fail compliance check (empty if compliant)
+            non-compliant-text: first sentence in input to fail compliance check
+                (empty if compliant)
         """
         self.model = self.model.eval()
         input_strs = self.test_dataset[self.config["input_data"]["content_column"]].tolist()
