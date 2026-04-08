@@ -3,14 +3,12 @@ from nltk import ngrams
 from nltk.stem import SnowballStemmer, WordNetLemmatizer
 from nltk.tokenize import RegexpTokenizer
 
-nltk.download("punkt_tab")
-
 
 class ProtectedAttributesStopWordsCheck(object):
     def __init__(self, denied_phrases_file):
         nltk.download("wordnet")
         nltk.download("omw-1.4")
-        nltk.download("punkt")
+        nltk.download("punkt_tab")
         self.lemmatizer = WordNetLemmatizer()
         self.stemmer = SnowballStemmer("english")
         self.tokenizer = RegexpTokenizer(r"\w+")

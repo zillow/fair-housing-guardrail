@@ -1,6 +1,7 @@
 from .fair_housing_classification import (
+    BinaryTrainer,
+    CrossEntropyTrainer,
     FairHousingGuardrailClassification,
-    SigmoidTrainer,
 )
 from .helper import (
     compute_metrics,
@@ -14,7 +15,8 @@ from .stop_phrases import ProtectedAttributesStopWordsCheck
 
 __all__ = [
     "FairHousingGuardrailClassification",
-    "SigmoidTrainer",
+    "CrossEntropyTrainer",
+    "BinaryTrainer",
     "compute_metrics",
     "load_config",
     "load_tokenizer",
