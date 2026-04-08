@@ -4,7 +4,6 @@ from typing import Dict, List, Tuple, Union
 import torch
 from transformers import DataCollatorWithPadding, Trainer, TrainingArguments
 
-from fair_housing_guardrail.data.constants import ID_TO_LABEL
 from fair_housing_guardrail.utils.helper import (
     compute_metrics,
     load_model,
@@ -16,16 +15,32 @@ logger.setLevel(logging.INFO)
 
 
 class FairHousingGuardrailClassification:
-    def __init__(self, config={}, tokenizer=None, train_data=None, test_data=None):
+    def __init__(
+        self,
+        config={},
+        model=None,
+        tokenizer=None,
+        train_data=None,
+        test_data=None,
+        LABEL_TO_ID=None,
+        ID_TO_LABEL=None,
+    ):
         self.config = config
         self.tokenizer = tokenizer
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        self.model = load_model(self.config)
-        self.model = self.model.to(self.device)
+        self.IS_BINARY = config["input_data"]["is_binary"]
+        num_labels = 1 if self.IS_BINARY else len(LABEL_TO_ID)
+        if model is not None:
+            self.model = model.to(self.device)
+        else:
+            self.model = load_model(self.config, num_labels)
+            self.model = self.model.to(self.device)
         self.phrase_checker = load_phrase_checker(self.config["input_data"]["stop_list_path"])
         self.train_dataset = train_data
         self.test_dataset = test_data
         self.predictions = []
+        self.LABEL_TO_ID = LABEL_TO_ID
+        self.ID_TO_LABEL = ID_TO_LABEL
 
     def train(self) -> Tuple[List[Tuple[float, int]], List[Tuple[float, int]]]:
         # Set training arguments from config if present otherwise set default values
@@ -37,7 +52,7 @@ class FairHousingGuardrailClassification:
             per_device_eval_batch_size=int(config_model.get("eval_batch_size", 32)),
             num_train_epochs=int(config_model.get("num_train_epochs", 1)),
             weight_decay=float(config_model.get("weight_decay", 0.01)),
-            evaluation_strategy="steps",
+            eval_strategy="steps",
             eval_steps=int(config_model.get("eval_steps", 10)),
             logging_steps=int(config_model.get("logging_steps", 20)),
             save_strategy="steps",
@@ -48,7 +63,9 @@ class FairHousingGuardrailClassification:
             push_to_hub=False,
             group_by_length=True,
         )
-        self.trainer = SigmoidTrainer(
+        trainer_class = BinaryTrainer if self.IS_BINARY else CrossEntropyTrainer
+
+        self.trainer = trainer_class(
             model=self.model,
             args=training_args,
             train_dataset=self.train_dataset,
@@ -71,31 +88,27 @@ class FairHousingGuardrailClassification:
         """
         Populates self.predictions with Dict objects.
         Each object represents the prediction results per input with the following data:
-            prediction: compliant or non-compliant
-            score: classifier score (0 if Stoplist fails)
-            non-compliant-text: first sentence in input to fail compliance check
-            (empty if compliant)
+            prediction: predicted class label
+            score: classifier confidence (probability)
+            non-compliant-text: first sentence in input to fail compliance check (empty if compliant)
         """
         self.model = self.model.eval()
         input_strs = self.test_dataset[self.config["input_data"]["content_column"]].tolist()
 
-        if "fairhousing" in self.config and "threshold" in self.config["fairhousing"]:
-            threshold = self.config["fairhousing"]["threshold"]
-            logger.info(f"Using config threshold of {threshold}.")
-        else:
-            threshold = 0.5
-            logger.info("Threshold not found in config, using 0.5 as threshold.")
-
         # Build batch of sentences to run against classifier
-        # Each individual sentence is checked against model
         sentences = []
-        input_mapping = {}
-        for input_str in input_strs:
+        input_mapping = {}  # Maps sentence index to input string index
+        for input_str_idx, input_str in enumerate(input_strs):
             for sent in self.phrase_checker.get_sentences(input_str):
                 sent = sent[:-1] if (sent.endswith(".") or sent.endswith("?")) else sent
                 sent = sent.lower()
                 sentences.append(sent)
-                input_mapping[sent] = input_str
+                input_mapping[len(sentences) - 1] = input_str_idx
+
+        # Initialize dictionaries with default values for all input indices
+        predictions = {idx: "compliant" for idx in range(len(input_strs))}
+        total_scores = {idx: [] for idx in range(len(input_strs))}
+        non_compliant_text = {idx: "" for idx in range(len(input_strs))}
 
         feats = self.tokenizer(
             sentences,
@@ -108,64 +121,85 @@ class FairHousingGuardrailClassification:
         with torch.inference_mode():
             outs = self.model(**feats)
 
-        preds = torch.nn.functional.sigmoid(outs.logits.squeeze(1))
-        # Set value of 0 or 1 to preds, based on threshold
-        preds_modified = torch.where(
-            preds > threshold,
-            torch.tensor(1, device=self.device),
-            torch.tensor(0, device=self.device),
-        )
+        # Get predictions and probabilities
+        if self.IS_BINARY:
+            # For binary, we need to get the threshold from the config
+            if "fairhousing" in self.config and "threshold" in self.config["fairhousing"]:
+                threshold = self.config["fairhousing"]["threshold"]
+            else:
+                logger.info("Threshold not found in config, using 0.5 as threshold")
+                threshold = 0.5
 
+            probs = torch.sigmoid(outs.logits.squeeze(-1))
+            preds = torch.where(
+                probs > threshold,
+                1,
+                0,
+            )
+        else:
+            probs = torch.nn.functional.softmax(outs.logits, dim=-1)
+            preds = torch.argmax(probs, dim=-1)
         preds = preds.cpu().numpy()
-        preds_modified = preds_modified.cpu().numpy()
+        probs = probs.cpu().numpy()
 
         # Map sentence predictions back to their original input text
-        total_score = {}
-        prediction = {}
-        non_compliant_text = {}
-        for pred, pred_modified, sent in zip(preds, preds_modified, sentences):
-            # Set defaults if this is the first sentence of input being checked
-            prediction.setdefault(input_mapping[sent], "compliant")
-            total_score.setdefault(input_mapping[sent], [])
-            non_compliant_text.setdefault(input_mapping[sent], "")
-            if prediction.get(input_mapping[sent], "compliant") == "non-compliant":
-                # Input already determined to be non-compliant, skip
+        for i, (sent, pred, prob) in enumerate(zip(sentences, preds, probs)):
+            input_str_idx = input_mapping[i]
+            # If we've already found a non-compliant sentence for this input, skip
+            if "non-compliant" in predictions.get(input_str_idx, "compliant"):
                 continue
             if self.phrase_checker.check_phrase_is_stoplist_compliant(sent):
                 # Stoplist passed
-                score = pred.item()
-                sent_prediction = ID_TO_LABEL[pred_modified.item()]
-                if sent_prediction == "non-compliant":
-                    prediction[input_mapping[sent]] = "non-compliant"
-                    total_score[input_mapping[sent]] = [score]
-                    non_compliant_text[input_mapping[sent]] = sent
-                total_score[input_mapping[sent]].append(score)
+                label = self.ID_TO_LABEL[pred]
+                score = float(prob) if self.IS_BINARY else float(prob[pred])
+                if "non-compliant" in label:
+                    predictions[input_str_idx] = label
+                    total_scores[input_str_idx] = [score]
+                    non_compliant_text[input_str_idx] = sent
+                    continue
+                total_scores[input_str_idx].append(score)
             else:
                 # Stoplist failure
                 logger.info(f"Stoplist check failed for sentence: {sent}")
-                prediction[input_mapping[sent]] = "non-compliant"
-                total_score[input_mapping[sent]] = [0]
-                non_compliant_text[input_mapping[sent]] = sent
+                predictions[input_str_idx] = (
+                    "non-compliant" if self.IS_BINARY else "non-compliant-stoplist"
+                )
+                total_scores[input_str_idx] = [0]
+                non_compliant_text[input_str_idx] = sent
 
         # Build final prediction for each input
-        for input_str in input_strs:
+        for input_str_idx in range(len(input_strs)):
             input_prediction = {
-                "prediction": prediction[input_str],
-                "score": sum(total_score[input_str]) / len(total_score[input_str]),
-                "non-compliant-text": non_compliant_text[input_str],
+                "prediction": predictions[input_str_idx],
+                "score": sum(total_scores[input_str_idx]) / len(total_scores[input_str_idx])
+                if total_scores[input_str_idx]
+                else 1.0,
+                "non-compliant-text": non_compliant_text[input_str_idx],
             }
             self.predictions.append(input_prediction)
 
         return self.predictions
 
 
-class SigmoidTrainer(Trainer):
-    loss_fn = torch.nn.BCEWithLogitsLoss()
+class CrossEntropyTrainer(Trainer):
+    loss_fn = torch.nn.CrossEntropyLoss()
 
-    def compute_loss(self, model, inputs, return_outputs: bool = False):
+    def compute_loss(self, model, inputs, return_outputs: bool = False, num_items_in_batch=None):
         outs = model(**{k: v for k, v in inputs.items() if k != "labels"})
         labels = inputs["labels"]
-        loss = self.loss_fn(outs.logits.squeeze(0).reshape(labels.shape, 1), labels)
+        loss = self.loss_fn(outs.logits, labels)
+        if return_outputs:
+            return loss, outs
+        return loss
+
+
+class BinaryTrainer(Trainer):
+    loss_fn = torch.nn.BCEWithLogitsLoss()
+
+    def compute_loss(self, model, inputs, return_outputs: bool = False, num_items_in_batch=None):
+        outs = model(**{k: v for k, v in inputs.items() if k != "labels"})
+        labels = inputs["labels"].float()
+        loss = self.loss_fn(outs.logits.squeeze(1), labels)
         if return_outputs:
             return loss, outs
         return loss
